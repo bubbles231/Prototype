@@ -1,1 +1,31 @@
 This is the notes file by bubbles231 for Prototype
+Description:
+    The programs purpose is for me to make a collision detection system for MarioQuest.
+    The benefit is that i only have to handle pygame rectangles and surfaces and simple stuff so i can make
+    progress faster. My goal is for me to make a collision detection system as described in highorderfun.
+    Goal 1: Handle tiles without slopes
+    Goal 2: Handle all tile sizes
+    Goal 3: Handle multiple tilesets
+    Goal 4: Handle moving platform collision
+    End Goal: Make this usable for MarioQuest
+
+Notes 11/25/13
+---------------
+DONE:
+    I have made this into a git repository.
+    I am going to make a new file called Helpers to contain all functions. I will make the player and tileset
+    methods
+    into helper functions for easy reuse.
+    The react_x and react_y will stay in the Player class and will be defined in an Enemy class
+    Add class TileSetsContainer which will contain all tilesets
+    Tilesets will be blitted in order (self.priority 0 == first 10 == last)
+NOT:
+   Aspect ratio doesnt have to be 1:1
+   Player handles TileSetContainer instead of tileset for collision, finds the closest tile out of all tilesets
+   All tilesets will get there closest tile, TileSetsContainer will determine the closest out of all of them
+
+This code is a little messy after hacking at it all night and doing major refactoring so clean it up.
+
+Helpers was made because i would like future things to check for tile collisions like enemies and such.
+
+Moving Platform code is messed up but don't do anything with it until done with above stuff.
