@@ -20,9 +20,9 @@ DONE:
     Add class TileSetsContainer which will contain all tilesets
     Tilesets will be blitted in order (self.priority 0 == first 10 == last)
 NOT:
-   Aspect ratio doesnt have to be 1:1
-   Player handles TileSetContainer instead of tileset for collision, finds the closest tile out of all tilesets
-   All tilesets will get there closest tile, TileSetsContainer will determine the closest out of all of them
+    Aspect ratio doesnt have to be 1:1
+    Player handles TileSetContainer instead of tileset for collision, finds the closest tile out of all tilesets
+    All tilesets will get there closest tile, TileSetsContainer will determine the closest out of all of them
 
 -
 Helpers was made because i would like future things to check for tile collisions like enemies and such.
@@ -34,9 +34,9 @@ Moving Platform code is messed up but don't do anything with it until done with 
 Notes 11/26/13
 ---------------
 GOAL FOR TODAY:
-     Handle moving platforms visualy and logically. BUGGY
-     Clean up the code.
-     Try adding an enemy if all above is done
+    Handle moving platforms visualy and logically. BUGGY
+    Clean up the code.
+    Try adding an enemy if all above is done
 DONE:
     Half Done moving platforms: buggy
     Collision detection can now handle different tile ratios like: (32, 64).
@@ -49,14 +49,14 @@ NOT:
 Notes 11/29/13
 --------------
 GOAL FOR TODAY:
-     Clean up code
-     Make platforms not buggy and reusable: 1. Don't hardcode path, velocity,
-     and etc 2. Collision Detection
+    Clean up code
+    Make platforms not buggy and reusable: 1. Don't hardcode path, velocity,
+    and etc 2. Collision Detection
 DONE:
     Platform collision detection
 NOT:
-   Platform collision reaction; it is buggy
-   Platform hardcoded path/velocity
+    Platform collision reaction; it is buggy
+    Platform hardcoded path/velocity
 
 NEW GOAL:
     Will continue without moving platforms for now
@@ -65,3 +65,21 @@ NEW GOAL:
 Design Note:
 BackgroundManager() will have one instance per background image, an update method, a draw method
 BackgroundContainer will contain all the backgrounds # HACKY as of now
+
+Design Note:
+!#!#!#!#
+Almost all backgrounds will need to be modified to contain an Alpha channel and cropped so it looks right
+!#!#!#!#
+
+STOP messing WITH THE VISUALS THIS IS FOR COLLISIONS AND PHYSICS
+
+
+
+Notes 02/04/14
+--------------
+GOAL FOR TODAY:
+     Clean up code
+     Finish slopes
+     Platforms are not eliminated to be implemented later
+Done:
+     Finish slopes
