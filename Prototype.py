@@ -257,10 +257,15 @@ class Tile(Entity):
         self.rect = pygame.Rect(x, y, width, height)
         self.tile_coords = Vector2(x//width, y//height)
         self.image = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
-        if type(img_path) is tuple:
+        if type(img_path) is str:
+            try:
+                self.image = pygame.image.load(img_path).convert_alpha()
+            except pygame.error:
+                print("Image", img_path, "is missing!")
+                self.image.fill((1, 1, 1))
+        elif type(img_path) is tuple:
             self.image.fill(img_path)
-        elif type(img_path) is str:
-            self.image = pygame.image.load(img_path).convert_alpha()
+
 
         self.slope = False
         self.floor_y = None
