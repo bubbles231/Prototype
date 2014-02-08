@@ -183,6 +183,7 @@ class TileSet(object):
         """
         self.debug_screen.blit(self.debug_img, (x, y))
 
+    # noinspection PyUnusedLocal
     def scan_x_right(self, y, tile_x, entity):
         """
 
@@ -194,8 +195,8 @@ class TileSet(object):
         for x in range(tile_x - 1, self.size_info['map'].x):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type  == 'solid' or
-                    tmp_tile.tile_type == 'ladder'):
+                if (tmp_tile.tile_type == 'solid' or
+                        tmp_tile.tile_type == 'ladder'):
                     if tmp_tile.tile_info['slope']:
                         solid_tile_list.append(tmp_tile)
                         if tmp_tile.tile_info['adjacent_tile'] == 'left':
@@ -214,6 +215,7 @@ class TileSet(object):
                 print("scan_y_right: KeyError out of tileset bounds")
         return solid_tile_list
 
+    # noinspection PyUnusedLocal
     def scan_x_left(self, y, tile_x, entity):
         """
 
@@ -225,8 +227,8 @@ class TileSet(object):
         for x in range(tile_x, -1, -1):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type  == 'solid' or
-                    tmp_tile.tile_type == 'ladder'):
+                if (tmp_tile.tile_type == 'solid' or
+                        tmp_tile.tile_type == 'ladder'):
                     if tmp_tile.tile_info['slope']:
                         solid_tile_list.append(tmp_tile)
                         if tmp_tile.tile_info['adjacent_tile'] == 'left':
@@ -256,8 +258,8 @@ class TileSet(object):
         for y in range(tile_y - 1, self.size_info['map'].y):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type  == 'solid' or
-                    tmp_tile.tile_type == 'ladder'):
+                if (tmp_tile.tile_type == 'solid' or
+                        tmp_tile.tile_type == 'ladder'):
                     solid_tile_list.append(tmp_tile)
                     if self.debug:
                         self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -279,8 +281,8 @@ class TileSet(object):
         for y in range(tile_y, -1, -1):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type  == 'solid' or
-                    tmp_tile.tile_type == 'ladder'):
+                if (tmp_tile.tile_type == 'solid' or
+                        tmp_tile.tile_type == 'ladder'):
                     solid_tile_list.append(tmp_tile)
                     if self.debug:
                         self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -307,7 +309,7 @@ class Tile(Entity):
     """
 
     @param position: Geometry.Vector2
-    @param tile_type: str
+    @param t_type: str
     @param dimensions: Geometry.Vector2
     @param img_path: str
     @param slope_pts: list
