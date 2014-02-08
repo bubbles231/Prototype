@@ -83,3 +83,6 @@ GOAL FOR TODAY:
      Platforms are not eliminated to be implemented later
 Done:
      Finish slopes
+
+
+I am going to merge Tile attr slope, floor_y, tall_edge, short_edge, adjacent_tile into one dict
