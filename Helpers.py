@@ -116,7 +116,7 @@ def closest_tile_x(tiles_to_check, entity):
     closest = None
     for tmp_tile in tiles_to_check:
         if (abs(tmp_tile.rect.centerx - entity.rect.centerx) <
-            distance_from_self):
+                distance_from_self):
             closest = tmp_tile
             distance_from_self = abs(tmp_tile.rect.centerx -
                                      entity.rect.centerx)
@@ -140,7 +140,7 @@ def closest_tile_y(tiles_to_check, entity):
     closest = None
     for tmp_tile in tiles_to_check:
         if (abs(tmp_tile.rect.centery - entity.rect.centery) <
-            distance_from_self):
+                distance_from_self):
             closest = tmp_tile
             distance_from_self = abs(tmp_tile.rect.centery -
                                      entity.rect.centery)
@@ -166,13 +166,13 @@ def closest_from_list_x(close_tile_list, entity):
         if tmp_tile is not None:
             if entity.info['normal'].x > 0:
                 if (abs(tmp_tile.rect.left - entity.rect.right) <
-                    distance_from_self):
+                        distance_from_self):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.left -
                                              entity.rect.right)
             else:
                 if (abs(tmp_tile.rect.right - entity.rect.left) <
-                distance_from_self):
+                        distance_from_self):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.right -
                                              entity.rect.left)
@@ -203,13 +203,13 @@ def closest_from_list_y(close_tile_list, entity):
         if tmp_tile is not None:
             if entity.info['normal'].y > 0:
                 if (abs(tmp_tile.rect.top - entity.rect.bottom) <
-                distance_from_self):
+                        distance_from_self):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.top -
                                              entity.rect.bottom)
             else:
                 if (abs(tmp_tile.rect.bottom - entity.rect.top) <
-                distance_from_self):
+                        distance_from_self):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.bottom -
                                              entity.rect.top)
@@ -256,7 +256,7 @@ def on_slope_tile(entity, tileset):
             tmp_tile = tileset.tile_array[i, bottom_y]
             if (tmp_tile.tile_info['slope'] is True and
                 tmp_tile.tile_info['floor_y'].x != 0 and
-                tmp_tile.tile_info['floor_y'].y != 0):
+                    tmp_tile.tile_info['floor_y'].y != 0):
                 return True
         except KeyError:
             print("on_slope_tile: KeyError out of tileset bounds")
@@ -272,10 +272,10 @@ def collide_platform_x(platform, entities):
     for e in entities:
         if pygame.sprite.collide_rect(platform, e):
             if (platform.info['normal'].x > 0 and platform.rect.x <
-                e.rect.x and platform.rect.right >= e.rect.left):
+                    e.rect.x and platform.rect.right >= e.rect.left):
                 e.rect.left = platform.rect.right
             if (platform.info['normal'].x < 0 and platform.rect.x >
-            e.rect.x and platform.rect.left <= e.rect.right):
+                    e.rect.x and platform.rect.left <= e.rect.right):
                 e.rect.right = platform.rect.left
 
 
@@ -289,11 +289,11 @@ def collide_platform_y(platform, entities):
         if pygame.sprite.collide_rect(platform, e):
             if (platform.info['normal'].y > 0 and platform.rect.bottom >
                 e.rect.top and platform.rect.x <= e.rect.y and e.rect.left >
-                platform.rect.left and e.rect.right < platform.rect.right):
+                    platform.rect.left and e.rect.right < platform.rect.right):
                 e.rect.top = platform.rect.bottom
             if (platform.info['normal'].y < 0 and platform.rect.top <
                 e.rect.bottom and platform.rect.x >= e.rect.y and e.rect.left >
-                platform.rect.left and e.rect.right < platform.rect.right):
+                    platform.rect.left and e.rect.right < platform.rect.right):
                 e.rect.bottom = platform.rect.top
 
 
@@ -309,18 +309,18 @@ def scan_for_platforms_x(entity, platform_group):
         if platform.rect.width >= entity.rect.width:
             if (platform.rect.left <= entity.rect.left <= platform.rect.right or
                 platform.rect.left <= entity.rect.right <=
-                platform.rect.right):
+                    platform.rect.right):
                 if (entity.info['normal'].y > 0 and platform.rect.top >=
                     entity.rect.bottom or entity.info['normal'].y < 0 and
-                    platform.rect.bottom <= entity.rect.top):
+                        platform.rect.bottom <= entity.rect.top):
                     platform_list.append(platform)
         else:
             if (entity.rect.left <= platform.rect.left <= entity.rect.right or
                 entity.rect.left <= platform.rect.right <=
-                entity.rect.right):
+                    entity.rect.right):
                 if (entity.info['normal'].y > 0 and platform.rect.top >=
                     entity.rect.bottom or entity.info['normal'].x < 0 and
-                    platform.rect.bottom <= entity.rect.top):
+                        platform.rect.bottom <= entity.rect.top):
                     platform_list.append(platform)
                 platform_list.append(platform)
     return platform_list
@@ -338,18 +338,18 @@ def scan_for_platforms_y(entity, platform_group):
         if platform.rect.height >= entity.rect.height:
             if (platform.rect.top <= entity.rect.top <= platform.rect.bottom or
                 platform.rect.top <= entity.rect.bottom <=
-                platform.rect.bottom):
+                    platform.rect.bottom):
                 if (entity.info['normal'].x > 0 and platform.rect.left >=
                     entity.rect.right or entity.info['normal'].x < 0 and
-                    platform.rect.right <= entity.rect.left):
+                        platform.rect.right <= entity.rect.left):
                     platform_list.append(platform)
         else:
             if (entity.rect.top <= platform.rect.top <= entity.rect.bottom or
                 entity.rect.top <= platform.rect.bottom <=
-                entity.rect.bottom):
+                    entity.rect.bottom):
                 if (entity.info['normal'].x > 0 and platform.rect.left >=
                     entity.rect.right or entity.info['normal'].x < 0 and
-                    platform.rect.right <= entity.rect.left):
+                        platform.rect.right <= entity.rect.left):
                     platform_list.append(platform)
     return platform_list
 
