@@ -46,14 +46,14 @@ def scan_for_tiles_x(tileset, entity):
             tmp_tile_list = tileset.scan_x_right(i,
                                                  (entity.forward_edge.x //
                                                   tileset.size_info['tile'].x)
-                                                 + 1)
+                                                 + 1, entity)
             all_tiles.extend(tmp_tile_list)
     else:
         for i in range(intersecting_range[0], intersecting_range[1]):
             tmp_tile_list = tileset.scan_x_left(i,
                                                 (entity.forward_edge.x //
                                                  tileset.size_info['tile'].x)
-                                                - 1)
+                                                - 1, entity)
             all_tiles.extend(tmp_tile_list)
 
     if on_slope_tile(entity, tileset):
@@ -84,14 +84,14 @@ def scan_for_tiles_y(tileset, entity):
             tmp_tile_list = tileset.scan_y_bottom(i,
                                                   (entity.forward_edge.y //
                                                    tileset.size_info['tile'].y)
-                                                  + 1)
+                                                  + 1, entity)
             all_tiles.extend(tmp_tile_list)
     else:
         for i in range(intersecting_range[0], intersecting_range[1]):
             tmp_tile_list = tileset.scan_y_top(i,
                                                (entity.forward_edge.y //
                                                 tileset.size_info['tile'].y)
-                                               - 1)
+                                               - 1, entity)
             all_tiles.extend(tmp_tile_list)
     if on_slope_tile(entity, tileset):
         for i in range(0, len(all_tiles)):
@@ -481,3 +481,9 @@ class BackgroundManager(object):
             screen.blit(self.background, (self.position.x,
                                           self.position.y + 32))
             copies -= 1
+
+
+def oneway_platform_checker(entity, tile):
+    if (entity.rect.bottom - 1) <= tile.rect.top:
+        return True
+    return False
