@@ -88,3 +88,5 @@ I am going to merge Tile attr slope, floor_y, tall_edge, short_edge, adjacent_ti
 
 NOTE: I a finished making one-way tiles and got collision detection partly done for ladders
 reaction needs to be made for ladders!
+##################################################################################################
+make the logic make more sense with scan functions

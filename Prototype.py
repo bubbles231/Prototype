@@ -135,28 +135,28 @@ class TileSet(object):
         elif tile_id == 8:
             tile = Tile(tile_position, '', tile_size, (224, 224, 224))
         elif tile_id == 9:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Left/frame752.png', [0, 32])
         elif tile_id == 10:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Left/frame818.png', [0, 32])
         elif tile_id == 11:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Left/frame877.png', [0, 16])
         elif tile_id == 12:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Left/frame878.png', [17, 32])
         elif tile_id == 13:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Right/frame750.png', [32, 0])
         elif tile_id == 14:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Right/frame815.png', [32, 0])
         elif tile_id == 15:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Right/frame707.png', [16, 0])
         elif tile_id == 16:
-            tile = Tile(tile_position, 'solid', tile_size,
+            tile = Tile(tile_position, 'slope', tile_size,
                         'data/Tiles/Slope/Right/frame706.png', [32, 17])
         elif tile_id == 17:
             tile = Tile(tile_position, 'one-way', tile_size, (0, 224, 24))
@@ -196,9 +196,8 @@ class TileSet(object):
         for x in range(tile_x - 1, self.size_info['map'].x):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type == 'solid' or
-                        tmp_tile.tile_type == 'ladder'):
-                    if tmp_tile.tile_info['slope']:
+                if tmp_tile.tile_info['type'] != '':
+                    if tmp_tile.tile_info['type'] == 'slope':
                         solid_tile_list.append(tmp_tile)
                         if tmp_tile.tile_info['adjacent_tile'] == 'left':
                             self.not_considered_tiles.append(
@@ -208,7 +207,11 @@ class TileSet(object):
                                 self.tile_array[x + 1, y])
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                    elif not tmp_tile.tile_info['slope']:
+                    elif tmp_tile.tile_info['type'] == 'one-way':  # ignore one-way
+                        pass
+                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
+                        print('scan_x_right: make ladder logic')
+                    else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -229,9 +232,8 @@ class TileSet(object):
         for x in range(tile_x, -1, -1):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type == 'solid' or
-                        tmp_tile.tile_type == 'ladder'):
-                    if tmp_tile.tile_info['slope']:
+                if tmp_tile.tile_info['type'] != '':
+                    if tmp_tile.tile_info['type'] == 'slope':
                         solid_tile_list.append(tmp_tile)
                         if tmp_tile.tile_info['adjacent_tile'] == 'left':
                             self.not_considered_tiles.append(
@@ -241,7 +243,11 @@ class TileSet(object):
                                 self.tile_array[x + 1, y])
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                    elif not tmp_tile.tile_info['slope']:
+                    elif tmp_tile.tile_info['type'] == 'one-way':  # ignore one-way
+                        pass
+                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
+                        print('scan_x_left: make ladder logic')
+                    else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -261,14 +267,16 @@ class TileSet(object):
         for y in range(tile_y - 1, self.size_info['map'].y):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type == 'solid' or
-                        tmp_tile.tile_type == 'ladder'):
-                    solid_tile_list.append(tmp_tile)
-                    if self.debug:
-                        self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                if tmp_tile.tile_type == 'one-way':
-                    if one_way_platform_checker(entity, tmp_tile):
+                if tmp_tile.tile_info['type'] != '':
+                    if tmp_tile.tile_info['type'] == 'one-way':
+                        if one_way_platform_checker(entity, tmp_tile):
+                            solid_tile_list.append(tmp_tile)
+                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
+                        print('scan_y_bottom: make ladder logic')
+                    else:
                         solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
             except KeyError:
                 print("scan_y_bottom: KeyError out of tileset bounds")
         return solid_tile_list
@@ -285,14 +293,16 @@ class TileSet(object):
         for y in range(tile_y, -1, -1):
             try:
                 tmp_tile = self.tile_array[x, y]
-                if (tmp_tile.tile_type == 'solid' or
-                        tmp_tile.tile_type == 'ladder'):
-                    solid_tile_list.append(tmp_tile)
-                    if self.debug:
-                        self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                if tmp_tile.tile_type == 'one-way':
-                    if one_way_platform_checker(entity, tmp_tile):
+                if tmp_tile.tile_info['type'] != '':
+                    if tmp_tile.tile_info['type'] == 'one-way':
+                        if one_way_platform_checker(entity, tmp_tile):
+                            solid_tile_list.append(tmp_tile)
+                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
+                        print('scan_y_top: make ladder logic')
+                    else:
                         solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
             except KeyError:
                 print("scan_y_top: KeyError out of tileset bounds")
         return solid_tile_list
@@ -321,8 +331,6 @@ class Tile(Entity):
 
     def __init__(self, position, t_type, dimensions, img_path, slope_pts=None):
         Entity.__init__(self)
-        self.tile_type = t_type
-        # self.solid = solid
         self.rect = pygame.Rect(position.x, position.y, dimensions.x,
                                 dimensions.y)
         self.tile_coords = Vector2(position.x // dimensions.x,
@@ -340,14 +348,14 @@ class Tile(Entity):
             self.image.fill(img_path)
 
         self.tile_info = {
-            'slope': False,
+            'type': t_type,
             'floor_y': None,
             'tall_edge': None,
             'short_edge': None,
             'adjacent_tile': False
         }
 
-        if slope_pts is not None:
+        if self.tile_info['type'] == 'slope':
             self.tile_info['floor_y'] = Vector2(slope_pts[0],
                                                 slope_pts[1])
             if slope_pts[0] > slope_pts[1]:
@@ -360,7 +368,6 @@ class Tile(Entity):
                 self.tile_info['adjacent_tile'] = 'left'
             elif slope_pts[1] == 0:
                 self.tile_info['adjacent_tile'] = 'right'
-            self.tile_info['slope'] = True
             if ((self.tile_info['floor_y'].x == 0 and
                     self.tile_info['floor_y'].y == 32) or
                 (self.tile_info['floor_y'].x == 32 and
@@ -496,7 +503,7 @@ class Player(Entity):
                 close_tile_list.append(closest_tile_x(tiles_to_check, self))
             new_closest = closest_from_list_x(close_tile_list, self)
             if new_closest is not None:
-                if not new_closest.tile_info['slope']:
+                if not new_closest.tile_info['type'] == 'slope':
                     self.react_x(new_closest)
                 else:
                     # print("do x sloped tiles")
@@ -515,7 +522,7 @@ class Player(Entity):
                 close_tile_list.append(closest_tile_y(tiles_to_check, self))
             new_closest = closest_from_list_y(close_tile_list, self)
             if new_closest is not None:
-                if not new_closest.tile_info['slope']:
+                if not new_closest.tile_info['type'] == 'slope':
                     self.react_y(new_closest)
                 else:
                     # print("do y sloped tiles")

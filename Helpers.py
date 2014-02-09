@@ -176,7 +176,7 @@ def closest_from_list_x(close_tile_list, entity):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.right -
                                              entity.rect.left)
-            if tmp_tile.tile_info['slope']:
+            if tmp_tile.tile_info['type'] == 'slope':
                 slope_tile = touching_slope_tile(entity, tmp_tile)
                 if slope_tile is not None:
                     closest = slope_tile
@@ -213,7 +213,7 @@ def closest_from_list_y(close_tile_list, entity):
                     closest = tmp_tile
                     distance_from_self = abs(tmp_tile.rect.bottom -
                                              entity.rect.top)
-            if tmp_tile.tile_info['slope']:
+            if tmp_tile.tile_info['type'] == 'slope':
                 slope_tile = touching_slope_tile(entity, tmp_tile)
                 if slope_tile is not None:
                     closest = slope_tile
@@ -254,7 +254,7 @@ def on_slope_tile(entity, tileset):
     for i in range(intersecting_range[0], intersecting_range[1]):
         try:
             tmp_tile = tileset.tile_array[i, bottom_y]
-            if (tmp_tile.tile_info['slope'] is True and
+            if (tmp_tile.tile_info['type'] == 'slope' is True and
                 tmp_tile.tile_info['floor_y'].x != 0 and
                     tmp_tile.tile_info['floor_y'].y != 0):
                 return True
