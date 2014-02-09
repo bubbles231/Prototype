@@ -207,10 +207,12 @@ class TileSet(object):
                                 self.tile_array[x + 1, y])
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                    elif tmp_tile.tile_info['type'] == 'one-way':  # ignore one-way
+                    elif tmp_tile.tile_info['type'] == 'one-way':
                         pass
-                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
-                        print('scan_x_right: make ladder logic')
+                    elif tmp_tile.tile_info['type'] == 'ladder':
+                        solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
@@ -243,10 +245,12 @@ class TileSet(object):
                                 self.tile_array[x + 1, y])
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
-                    elif tmp_tile.tile_info['type'] == 'one-way':  # ignore one-way
+                    elif tmp_tile.tile_info['type'] == 'one-way':
                         pass
-                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
-                        print('scan_x_left: make ladder logic')
+                    elif tmp_tile.tile_info['type'] == 'ladder':
+                        solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
@@ -271,8 +275,10 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
-                        print('scan_y_bottom: make ladder logic')
+                    elif tmp_tile.tile_info['type'] == 'ladder':
+                        solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
@@ -297,8 +303,10 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif tmp_tile.tile_info['type'] == 'ladder':  # make ladder logic
-                        print('scan_y_top: make ladder logic')
+                    elif tmp_tile.tile_info['type'] == 'ladder':
+                        solid_tile_list.append(tmp_tile)
+                        if self.debug:
+                            self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     else:
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
@@ -503,9 +511,12 @@ class Player(Entity):
                 close_tile_list.append(closest_tile_x(tiles_to_check, self))
             new_closest = closest_from_list_x(close_tile_list, self)
             if new_closest is not None:
-                if not new_closest.tile_info['type'] == 'slope':
+                if (new_closest.tile_info['type'] == 'solid' or
+                        new_closest.tile_info['type'] == 'one-way'):
                     self.react_x(new_closest)
-                else:
+                elif new_closest.tile_info['type'] == 'ladder':
+                    self.react_ladder_x(new_closest)
+                elif new_closest.tile_info['type'] == 'slope':
                     # print("do x sloped tiles")
                     self.rect.x += self.velocity.x
                     self.react_slope_x(new_closest)
@@ -522,9 +533,12 @@ class Player(Entity):
                 close_tile_list.append(closest_tile_y(tiles_to_check, self))
             new_closest = closest_from_list_y(close_tile_list, self)
             if new_closest is not None:
-                if not new_closest.tile_info['type'] == 'slope':
+                if (new_closest.tile_info['type'] == 'solid' or
+                        new_closest.tile_info['type'] == 'one-way'):
                     self.react_y(new_closest)
-                else:
+                elif new_closest.tile_info['type'] == 'ladder':
+                    self.react_ladder_y(new_closest)
+                elif new_closest.tile_info['type'] == 'slope':
                     # print("do y sloped tiles")
                     self.react_slope_y(new_closest)
             else:
@@ -621,6 +635,14 @@ class Player(Entity):
             else:
                 self.rect.bottom = floor_y
                 self.info['on_ground'] = True
+
+    def react_ladder_x(self, close_tile):
+        self.rect.x += self.velocity.x
+        print('make react_ladder_x')
+
+    def react_ladder_y(self, close_tile):
+        self.rect.y += self.velocity.y
+        print('make react_ladder_y')
 
     def draw(self, screen, camera):
         """
