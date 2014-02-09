@@ -484,6 +484,12 @@ class BackgroundManager(object):
 
 
 def one_way_platform_checker(entity, tile):
+    """
+
+    @param entity: Prototype.Entity
+    @param tile: Prototype.Tile
+    @return: bool
+    """
     if (entity.rect.bottom - 1) <= tile.rect.top:
         return True
     return False
