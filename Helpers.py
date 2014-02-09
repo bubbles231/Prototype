@@ -483,7 +483,7 @@ class BackgroundManager(object):
             copies -= 1
 
 
-def oneway_platform_checker(entity, tile):
+def one_way_platform_checker(entity, tile):
     if (entity.rect.bottom - 1) <= tile.rect.top:
         return True
     return False
