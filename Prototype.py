@@ -275,7 +275,8 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif tmp_tile.tile_info['type'] == 'ladder':
+                    elif (tmp_tile.tile_info['type'] == 'ladder' and
+                            entity.info['hit_up']):
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -303,7 +304,8 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif tmp_tile.tile_info['type'] == 'ladder':
+                    elif (tmp_tile.tile_info['type'] == 'ladder' and
+                            entity.info['hit_up']):
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -457,6 +459,8 @@ class Player(Entity):
             'normal': Vector2(0, 0),
             'on_ground': False,
             'jumping': False,
+            'hit_up': False,
+            'hit_down': False,
             'gravity': 0.9
         }
 
@@ -637,12 +641,18 @@ class Player(Entity):
                 self.info['on_ground'] = True
 
     def react_ladder_x(self, close_tile):
-        self.rect.x += self.velocity.x
         print('make react_ladder_x')
+        print('hit_up:', self.info['hit_up'])
+        print('hit_down:', self.info['hit_down'])
+        self.rect.x += self.velocity.x
 
     def react_ladder_y(self, close_tile):
-        self.rect.y += self.velocity.y
         print('make react_ladder_y')
+        print('hit_up:', self.info['hit_up'])
+        print('hit_down:', self.info['hit_down'])
+        if self.rect.colliderect(close_tile.rect):
+            self.rect.y += self.velocity.y
+        self.rect.y += self.velocity.y
 
     def draw(self, screen, camera):
         """
@@ -772,6 +782,15 @@ def main(debugging):
                 player.velocity.x += 5
             else:
                 player.velocity.x += 3
+        if keys[pygame.K_UP]:
+            player.info['hit_up'] = True
+        else:
+            player.info['hit_up'] = False
+        if keys[pygame.K_DOWN]:
+            player.info['hit_down'] = True
+        else:
+            player.info['hit_down'] = False
+
 
         camera.update(player, screen_size)
 
