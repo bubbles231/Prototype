@@ -170,7 +170,8 @@ class TileSet(object):
         elif tile_id == 18:
             tile = Tile(tile_position, 'ladder', tile_size, (255, 255, 255))
         elif tile_id == 19:
-            tile = Tile(tile_position, 'ladder_top', tile_size, (255, 150, 200))
+            #  tile = Tile(tile_position, 'ladder_top', tile_size, (255, 150, 200))
+            tile = Tile(tile_position, 'ladder', tile_size, (255, 255, 255))
         return tile
 
     def draw(self):
@@ -617,6 +618,7 @@ class Player(Entity):
             self.info['on_ladder'] = True
         if self.info['on_ladder'] and self.info['hit_jump']:
             self.info['on_ladder'] = False
+            self.rect.y -= 2
         if not self.rect.colliderect(close_tile.rect):
             self.info['on_ladder'] = False
 
