@@ -80,11 +80,18 @@ class TileSet(object):
             for y in range(0, self.size_info['map'].y):
                 # noinspection PyTypeChecker
                 self.tile_array[x, y] = (self.make_tile
-                                        (level[y][x],
-                                            Vector2(
-                                                x * self.size_info['tile'].x,
-                                                y * self.size_info['tile'].y),
-                                            self.size_info['tile']))
+                                         (level[y][x],
+                                          Vector2(
+                                              x * self.size_info['tile'].x,
+                                              y * self.size_info['tile'].y),
+                                          self.size_info['tile']))
+        self.ladder_list = []
+        for x in range(0, self.size_info['map'].x):
+            for y in range(0, self.size_info['map'].y):
+                if (self.tile_array[x, y].tile_info['type'] == 'ladder' or
+                        self.tile_array[x, y].tile_info['type'] == 'ladder_top'):  # TODO add logic for top_ladder
+                    self.ladder_list.append(self.tile_array[x, y])
+
         self.priority = priority
         self.not_considered_tiles = []
 
@@ -162,6 +169,8 @@ class TileSet(object):
             tile = Tile(tile_position, 'one-way', tile_size, (0, 224, 24))
         elif tile_id == 18:
             tile = Tile(tile_position, 'ladder', tile_size, (255, 255, 255))
+        elif tile_id == 19:
+            tile = Tile(tile_position, 'ladder_top', tile_size, (255, 150, 200))
         return tile
 
     def draw(self):
@@ -209,7 +218,7 @@ class TileSet(object):
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     elif tmp_tile.tile_info['type'] == 'one-way':
                         pass
-                    elif tmp_tile.tile_info['type'] == 'ladder':
+                    elif tmp_tile.tile_info['type'] == 'ladder' or tmp_tile.tile_info['type'] == 'ladder_top':
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -247,7 +256,7 @@ class TileSet(object):
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
                     elif tmp_tile.tile_info['type'] == 'one-way':
                         pass
-                    elif tmp_tile.tile_info['type'] == 'ladder':
+                    elif tmp_tile.tile_info['type'] == 'ladder' or tmp_tile.tile_info['type'] == 'ladder_top':
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -275,8 +284,7 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif (tmp_tile.tile_info['type'] == 'ladder' and
-                            entity.info['hit_up']):
+                    elif tmp_tile.tile_info['type'] == 'ladder' or tmp_tile.tile_info['type'] == 'ladder_top':
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -304,8 +312,7 @@ class TileSet(object):
                     if tmp_tile.tile_info['type'] == 'one-way':
                         if one_way_platform_checker(entity, tmp_tile):
                             solid_tile_list.append(tmp_tile)
-                    elif (tmp_tile.tile_info['type'] == 'ladder' and
-                            entity.info['hit_up']):
+                    elif tmp_tile.tile_info['type'] == 'ladder' or tmp_tile.tile_info['type'] == 'ladder_top':
                         solid_tile_list.append(tmp_tile)
                         if self.debug:
                             self.debug_draw(tmp_tile.rect.x, tmp_tile.rect.y)
@@ -378,62 +385,11 @@ class Tile(Entity):
                 self.tile_info['adjacent_tile'] = 'left'
             elif slope_pts[1] == 0:
                 self.tile_info['adjacent_tile'] = 'right'
-            if ((self.tile_info['floor_y'].x == 0 and
-                    self.tile_info['floor_y'].y == 32) or
-                (self.tile_info['floor_y'].x == 32 and
-                    self.tile_info['floor_y'].y == 0)):
+            if ((self.tile_info['floor_y'].x == 0 and self.tile_info['floor_y'].y == 32) or
+                    (self.tile_info['floor_y'].x == 32 and self.tile_info['floor_y'].y == 0)):
                 self.hack_for_slope = True
             else:
                 self.hack_for_slope = False
-
-
-class MovingPlatform(Entity):
-    """
-
-    @type width: int
-    @type height: int
-    @type range_x: tuple
-    @type range_y: tuple
-    """
-
-    def __init__(self, width, height, range_x, range_y, color):
-        Entity.__init__(self)
-        self.range_x = Vector2(range_x[0], range_x[1])
-        self.range_y = Vector2(range_y[0], range_y[1])
-        self.rect = pygame.Rect(range_x[0], range_y[0], width, height)
-        # noinspection PyArgumentList
-        self.image = pygame.Surface((width, height))
-        self.image.fill(color)
-        self.velocity = Vector2(0, 0)
-        self.strait = Vector2(1, 0)  # TODO: tilemap gets path and velocity
-        self.normal = Vector2(0, 0)
-        self.moving = True
-
-    def update(self):
-        """
-
-        The update() will update the position and velocity.
-        """
-        if self.rect.left <= self.range_x.x:
-            self.normal.x = 1
-        elif self.rect.right >= self.range_x.y:
-            self.normal.x = -1
-        if self.rect.top <= self.range_y.x:
-            self.normal.y = 1
-        elif self.rect.bottom >= self.range_y.y:
-            self.normal.y = -1
-
-        self.velocity.x = self.strait.x * self.normal.x
-        self.velocity.y = self.strait.y * self.normal.y
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
-
-    def draw(self, screen):
-        """
-
-        @type screen: pygame.Surface
-        """
-        screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 class Player(Entity):
@@ -458,9 +414,14 @@ class Player(Entity):
         self.info = {
             'normal': Vector2(0, 0),
             'on_ground': False,
+            'on_ladder': False,
+            'on_top_ladder': False,
             'jumping': False,
             'hit_up': False,
             'hit_down': False,
+            'hit_left': False,
+            'hit_right': False,
+            'hit_jump': False,
             'gravity': 0.9
         }
 
@@ -513,19 +474,21 @@ class Player(Entity):
             for tileset in tileset_group.tileset_list:
                 tiles_to_check = scan_for_tiles_x(tileset, self)
                 close_tile_list.append(closest_tile_x(tiles_to_check, self))
+            new_ladder_closest = closest_ladder_x(close_tile_list, self)
             new_closest = closest_from_list_x(close_tile_list, self)
             if new_closest is not None:
                 if (new_closest.tile_info['type'] == 'solid' or
                         new_closest.tile_info['type'] == 'one-way'):
                     self.react_x(new_closest)
-                elif new_closest.tile_info['type'] == 'ladder':
-                    self.react_ladder_x(new_closest)
                 elif new_closest.tile_info['type'] == 'slope':
                     # print("do x sloped tiles")
                     self.rect.x += self.velocity.x
                     self.react_slope_x(new_closest)
-            else:
+            elif new_ladder_closest is None:
                 self.rect.x += self.velocity.x
+
+            if new_ladder_closest is not None:
+                self.react_ladder_x(new_ladder_closest)
         if self.info['normal'].y:
             close_tile_list = []
             possible_platforms = scan_for_platforms_x(self, platform_group)
@@ -535,21 +498,24 @@ class Player(Entity):
             for tileset in tileset_group.tileset_list:
                 tiles_to_check = scan_for_tiles_y(tileset, self)
                 close_tile_list.append(closest_tile_y(tiles_to_check, self))
+            new_ladder_closest = closest_ladder_x(close_tile_list, self)
             new_closest = closest_from_list_y(close_tile_list, self)
             if new_closest is not None:
                 if (new_closest.tile_info['type'] == 'solid' or
                         new_closest.tile_info['type'] == 'one-way'):
                     self.react_y(new_closest)
-                elif new_closest.tile_info['type'] == 'ladder':
-                    self.react_ladder_y(new_closest)
                 elif new_closest.tile_info['type'] == 'slope':
                     # print("do y sloped tiles")
                     self.react_slope_y(new_closest)
-            else:
+            elif new_ladder_closest is None:
                 self.rect.y += self.velocity.y
+
+            if new_ladder_closest is not None:
+                self.react_ladder_y(new_ladder_closest)
 
         self.info['jumping'] = self.info['jumping'] and self.velocity.y < 0
         self.velocity.x = 0
+        # if not self.info['on_ladder']:  # Counteract this below
         self.velocity.y = min(self.velocity.y + self.info['gravity'], 15)
 
     def react_x(self, close_tile):
@@ -587,6 +553,7 @@ class Player(Entity):
                 self.rect.top += self.velocity.y
             else:
                 self.rect.top = close_tile.rect.bottom
+                self.velocity.y = 0.5
 
     def react_slope_x(self, close_tile):
         """
@@ -640,18 +607,39 @@ class Player(Entity):
                 self.rect.bottom = floor_y
                 self.info['on_ground'] = True
 
-    def react_ladder_x(self, close_tile):
-        print('make react_ladder_x')
+    def pre_react_ladder(self, close_tile):
+        print('on_ladder: ', self.info['on_ladder'])
         print('hit_up:', self.info['hit_up'])
         print('hit_down:', self.info['hit_down'])
+        print('hit_jump:', self.info['hit_jump'])
+        if (self.rect.colliderect(close_tile.rect) or self.info['hit_up'] or
+                self.info['hit_down']):
+            self.info['on_ladder'] = True
+        if self.info['on_ladder'] and self.info['hit_jump']:
+            self.info['on_ladder'] = False
+        if not self.rect.colliderect(close_tile.rect):
+            self.info['on_ladder'] = False
+
+    def react_ladder_x(self, close_tile):
+        self.pre_react_ladder(close_tile)
+        # print('make react_ladder_x')
+        if self.info['on_ladder']:
+            if self.info['hit_left']:
+                self.rect.x -= 2
+            elif self.info['hit_right']:
+                self.rect.x += 2
+            return
         self.rect.x += self.velocity.x
 
     def react_ladder_y(self, close_tile):
-        print('make react_ladder_y')
-        print('hit_up:', self.info['hit_up'])
-        print('hit_down:', self.info['hit_down'])
-        if self.rect.colliderect(close_tile.rect):
-            self.rect.y += self.velocity.y
+        self.pre_react_ladder(close_tile)
+        # print('make react_ladder_y')
+        if self.info['on_ladder']:
+            if self.info['hit_up']:
+                self.rect.y -= 2
+            elif self.info['hit_down']:
+                self.rect.y += 2
+            return
         self.rect.y += self.velocity.y
 
     def draw(self, screen, camera):
@@ -684,24 +672,61 @@ def main(debugging):
     screen = pygame.display.set_mode((screen_size.x, screen_size.y))
     clock = pygame.time.Clock()
 
-    my_tiles_0 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 17, 17, 18, 17, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 17, 17, 17, 17, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 15, 1, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 5, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 0, 0, 0, 13, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 7, 7, 7, 7, 7, 7, 7, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 10, 0, 13, 1, 0, 1, 1, 10, 0, 13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 1, 1, 1, 1, 1, 11, 12, 0, 0, 16, 15, 1, 1, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 7, 7, 7, 7, 7, 7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1]]
+    my_tiles_0 = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 17, 1, 19, 1, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 17, 17, 1, 17, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8,
+         8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 11, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 15, 1, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 8, 8,
+         8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 8, 8,
+         8, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 5, 8, 8,
+         8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 0, 0, 0, 13, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 10, 0, 0, 0, 0, 0, 0, 14, 1, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 7, 7, 7,
+         7, 7, 7, 7, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 10, 0, 13, 1, 0, 1, 1, 10, 0, 13, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 11, 12, 0, 0, 16, 15, 1, 1, 1, 1, 1, 1, 6, 6, 0, 0, 3, 3, 0, 7, 7, 7, 7, 7, 5, 5, 7, 7, 7,
+         7, 7, 7, 7, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+         0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1]]
 
     tw_0 = 32
     th_0 = 32
@@ -790,7 +815,18 @@ def main(debugging):
             player.info['hit_down'] = True
         else:
             player.info['hit_down'] = False
-
+        if keys[pygame.K_LEFT]:
+            player.info['hit_left'] = True
+        else:
+            player.info['hit_left'] = False
+        if keys[pygame.K_RIGHT]:
+            player.info['hit_right'] = True
+        else:
+            player.info['hit_right'] = False
+        if keys[pygame.K_SPACE]:
+            player.info['hit_jump'] = True
+        else:
+            player.info['hit_jump'] = False
 
         camera.update(player, screen_size)
 
@@ -814,5 +850,5 @@ if __name__ == "__main__":
             debug = True
         else:
             debug = False
-        # noinspection PyUnboundLocalVariable
+            # noinspection PyUnboundLocalVariable
     main(debug)

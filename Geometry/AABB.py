@@ -3,12 +3,14 @@ import pygame
 import math
 from .Vector2 import Vector2
 
+
 class AABB(object):
     def __init__(self, center, half_extents):
         center = center
         half_extents = half_extents
         self.rect = pygame.Rect(center.x - half_extents.x, center.y - half_extents.y, (half_extents.x * 2),
                                 (half_extents.y * 2))
+        self.aabb_surface = None
 
     def set_rect(self, new_width, new_height):
         self.rect.center = (self.rect.center[0] - (new_width - self.rect.width), self.rect.center[1]

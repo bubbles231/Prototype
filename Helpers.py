@@ -153,6 +153,62 @@ def closest_tile_y(tiles_to_check, entity):
     return closest
 
 
+def closest_ladder_x(close_tile_list, entity):
+    distance_from_self = 1000000
+    closest = None
+    for tmp_tile in close_tile_list:
+        if tmp_tile is not None:
+            if tmp_tile.tile_info['type'] == 'ladder':
+                if entity.info['normal'].x > 0:                
+                    if (abs(tmp_tile.rect.left - entity.rect.right) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.left -
+                                                 entity.rect.right)
+                else:
+                    if (abs(tmp_tile.rect.right - entity.rect.left) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.right -
+                                                 entity.rect.left)
+
+    if closest is not None:
+        # noinspection PyArgumentList
+        closest_img = pygame.Surface((closest.rect.width, closest.rect.height))
+        closest_img.fill((123, 50, 50))
+        if entity.debug:
+            entity.debug_draw(closest_img, closest.rect.x, closest.rect.y)
+    return closest
+
+
+def closest_ladder_y(close_tile_list, entity):
+    distance_from_self = 1000000
+    closest = None
+    for tmp_tile in close_tile_list:
+        if tmp_tile is not None:
+            if tmp_tile.tile_info['type'] == 'ladder':
+                if entity.info['normal'].y > 0:
+                    if (abs(tmp_tile.rect.top - entity.rect.bottom) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.top -
+                                                 entity.rect.bottom)
+                else:
+                    if (abs(tmp_tile.rect.bottom - entity.rect.top) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.bottom -
+                                                 entity.rect.top)
+
+    if closest is not None:
+        # noinspection PyArgumentList
+        closest_img = pygame.Surface((closest.rect.width, closest.rect.height))
+        closest_img.fill((255, 100, 100))
+        if entity.debug:
+            entity.debug_draw(closest_img, closest.rect.x, closest.rect.y)
+    return closest
+
+
 def closest_from_list_x(close_tile_list, entity):
     """
 
@@ -164,22 +220,23 @@ def closest_from_list_x(close_tile_list, entity):
     closest = None
     for tmp_tile in close_tile_list:
         if tmp_tile is not None:
-            if entity.info['normal'].x > 0:
-                if (abs(tmp_tile.rect.left - entity.rect.right) <
-                        distance_from_self):
-                    closest = tmp_tile
-                    distance_from_self = abs(tmp_tile.rect.left -
-                                             entity.rect.right)
-            else:
-                if (abs(tmp_tile.rect.right - entity.rect.left) <
-                        distance_from_self):
-                    closest = tmp_tile
-                    distance_from_self = abs(tmp_tile.rect.right -
-                                             entity.rect.left)
-            if tmp_tile.tile_info['type'] == 'slope':
-                slope_tile = touching_slope_tile(entity, tmp_tile)
-                if slope_tile is not None:
-                    closest = slope_tile
+            if tmp_tile.tile_info['type'] != 'ladder':
+                if entity.info['normal'].x > 0:
+                    if (abs(tmp_tile.rect.left - entity.rect.right) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.left -
+                                                 entity.rect.right)
+                else:
+                    if (abs(tmp_tile.rect.right - entity.rect.left) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.right -
+                                                 entity.rect.left)
+                if tmp_tile.tile_info['type'] == 'slope':
+                    slope_tile = touching_slope_tile(entity, tmp_tile)
+                    if slope_tile is not None:
+                        closest = slope_tile
 
     if closest is not None:
         # noinspection PyArgumentList
@@ -201,22 +258,23 @@ def closest_from_list_y(close_tile_list, entity):
     closest = None
     for tmp_tile in close_tile_list:
         if tmp_tile is not None:
-            if entity.info['normal'].y > 0:
-                if (abs(tmp_tile.rect.top - entity.rect.bottom) <
-                        distance_from_self):
-                    closest = tmp_tile
-                    distance_from_self = abs(tmp_tile.rect.top -
-                                             entity.rect.bottom)
-            else:
-                if (abs(tmp_tile.rect.bottom - entity.rect.top) <
-                        distance_from_self):
-                    closest = tmp_tile
-                    distance_from_self = abs(tmp_tile.rect.bottom -
-                                             entity.rect.top)
-            if tmp_tile.tile_info['type'] == 'slope':
-                slope_tile = touching_slope_tile(entity, tmp_tile)
-                if slope_tile is not None:
-                    closest = slope_tile
+            if tmp_tile.tile_info['type'] != 'ladder':
+                if entity.info['normal'].y > 0:
+                    if (abs(tmp_tile.rect.top - entity.rect.bottom) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.top -
+                                                 entity.rect.bottom)
+                else:
+                    if (abs(tmp_tile.rect.bottom - entity.rect.top) <
+                            distance_from_self):
+                        closest = tmp_tile
+                        distance_from_self = abs(tmp_tile.rect.bottom -
+                                                 entity.rect.top)
+                if tmp_tile.tile_info['type'] == 'slope':
+                    slope_tile = touching_slope_tile(entity, tmp_tile)
+                    if slope_tile is not None:
+                        closest = slope_tile
 
     if closest is not None:
         # noinspection PyArgumentList

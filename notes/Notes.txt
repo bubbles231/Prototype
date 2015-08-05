@@ -17,7 +17,7 @@ DONE:
     methods
     into helper functions for easy reuse.
     The react_x and react_y will stay in the Player class and will be defined in an Enemy class
-    Add class TileSetsContainer which will contain all tilesets
+    add class TileSetsContainer which will contain all tilesets
     Tilesets will be blitted in order (self.priority 0 == first 10 == last)
 NOT:
     Aspect ratio doesnt have to be 1:1
@@ -90,3 +90,5 @@ NOTE: I a finished making one-way tiles and got collision detection partly done 
 reaction needs to be made for ladders!
 ##################################################################################################
 make the logic make more sense with scan functions
+
+Ladders cannot have one-way platforms underthem
